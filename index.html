@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusFlow | Student Management</title>
+  <style>
+    :root {
+      --bg:#f5f7fb; --panel:#ffffff; --ink:#172033; --muted:#7b8498;
+      --line:#e7eaf1; --primary:#5b5ce2; --primary-soft:#eeeeff;
+      --green:#1b9a72; --green-soft:#e5f7f0; --orange:#d88a24; --orange-soft:#fff4df;
+      --red:#d64b61; --red-soft:#ffedf0; --shadow:0 12px 35px rgba(32,43,78,.06);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    .app{display:flex;min-height:100vh}
+    .sidebar{width:248px;background:#fff;border-right:1px solid var(--line);padding:25px 17px;display:flex;flex-direction:column;flex-shrink:0}
+    .brand{display:flex;align-items:center;gap:11px;padding:0 11px 31px;font-size:19px;font-weight:800;letter-spacing:-.6px}
+    .brand-mark{width:38px;height:38px;background:linear-gradient(135deg,#6968ef,#4645c7);border-radius:12px;color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:0 7px 15px #5b5ce244}
+    .brand span small{display:block;color:var(--muted);font-size:10px;font-weight:600;letter-spacing:1.5px;margin-top:2px}
+    .nav-label{padding:0 13px;margin:7px 0 10px;color:#a2a9b8;font-size:10px;letter-spacing:1.6px;font-weight:800}
+    .nav{display:grid;gap:5px}
+    .nav button{border:0;background:transparent;color:#7b8498;text-align:left;border-radius:11px;padding:12px 13px;display:flex;align-items:center;gap:13px;font-size:13px;font-weight:650}
+    .nav button .ico{font-size:17px;width:20px;text-align:center}
+    .nav button.active,.nav button:hover{background:var(--primary-soft);color:var(--primary)}
+    .sidebar-bottom{margin-top:auto;padding:15px 11px 0}
+    .help-card{background:#f7f7ff;border:1px solid #eeeeff;padding:15px;border-radius:14px}
+    .help-card strong{font-size:12px}.help-card p{font-size:11px;color:var(--muted);line-height:1.5}
+    .help-card button{border:0;background:#fff;color:var(--primary);padding:8px 10px;border-radius:8px;font-size:11px;font-weight:750}
+    .main{flex:1;min-width:0}
+    .topbar{height:78px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 35px;gap:20px}
+    .crumb{font-size:12px;color:var(--muted)}.crumb strong{color:var(--ink)}
+    .top-actions{display:flex;align-items:center;gap:17px}.today{font-size:12px;color:var(--muted)}
+    .avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#e5e7ff;color:#5152c7;font-weight:800;font-size:12px}
+    .profile{display:flex;align-items:center;gap:10px}.profile strong{font-size:12px;display:block}.profile small{font-size:10px;color:var(--muted)}
+    .content{padding:31px 35px 45px;max-width:1600px;margin:auto}
+    .welcome{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:25px}
+    h1{font-size:27px;letter-spacing:-.8px;margin:0 0 8px}.welcome p{margin:0;color:var(--muted);font-size:13px}
+    .primary-btn{border:0;border-radius:10px;background:var(--primary);color:#fff;padding:12px 17px;font-size:12px;font-weight:750;box-shadow:0 6px 14px #5b5ce233}
+    .primary-btn:hover{background:#4849c9;transform:translateY(-1px)}
+    .outline-btn{background:#fff;color:#4b5569;border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:12px;font-weight:650}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:17px;margin-bottom:24px}
+    .stat{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:20px 20px 17px;box-shadow:var(--shadow)}
+    .stat-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;font-weight:650}
+    .stat-icon{width:37px;height:37px;display:grid;place-items:center;border-radius:11px;font-size:18px}
+    .purple{background:var(--primary-soft)}.mint{background:var(--green-soft)}.peach{background:var(--orange-soft)}.pink{background:var(--red-soft)}
+    .stat h2{font-size:28px;margin:13px 0 8px;letter-spacing:-.7px}.trend{font-size:10px;color:var(--green);font-weight:700}.trend span{color:var(--muted);font-weight:500}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);overflow:hidden}
+    .panel-head{padding:21px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid var(--line)}
+    .panel-head h2{margin:0 0 5px;font-size:15px;letter-spacing:-.2px}.panel-head p{margin:0;color:var(--muted);font-size:11px}
+    .filters{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+    .search-wrap{position:relative}.search-wrap span{position:absolute;left:11px;top:9px;color:#9ba2b3}
+    .search-wrap input{padding-left:32px;width:205px}
+    input,select{background:#fff;border:1px solid #e3e6ee;border-radius:9px;padding:9px 11px;font-size:11px;color:var(--ink);outline:none}
+    input:focus,select:focus{border-color:#8585ed;box-shadow:0 0 0 3px #5b5ce215}
+    .table-wrap{overflow-x:auto}
+    table{border-collapse:collapse;width:100%;white-space:nowrap}
+    th{text-align:left;background:#fbfcfe;color:#939bad;font-size:10px;text-transform:uppercase;letter-spacing:.8px;font-weight:750;padding:13px 20px}
+    td{padding:15px 20px;border-top:1px solid #f0f2f7;font-size:12px}
+    tbody tr:hover{background:#fcfcff}
+    .student{display:flex;align-items:center;gap:10px}.student-avatar{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-weight:800;font-size:11px;background:#e9eaff;color:#5555c9}
+    .student-name{font-weight:750;font-size:12px}.student-email{font-size:10px;color:var(--muted);margin-top:4px}
+    .pill{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:5px 9px;font-size:10px;font-weight:750}
+    .pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+    .status-active{background:var(--green-soft);color:var(--green)}.status-inactive{background:#f0f1f5;color:#7e8798}.status-probation{background:var(--orange-soft);color:var(--orange)}
+    .attendance{display:flex;align-items:center;gap:8px}.bar{height:5px;width:55px;border-radius:9px;background:#edf0f6;overflow:hidden}.bar span{display:block;height:100%;border-radius:9px;background:var(--green)}.bar.low span{background:var(--orange)}
+    .row-actions{display:flex;gap:5px}.icon-btn{border:0;background:transparent;color:#9098aa;padding:6px;border-radius:7px}.icon-btn:hover{background:var(--primary-soft);color:var(--primary)}
+    .table-footer{display:flex;justify-content:space-between;align-items:center;padding:15px 22px;color:var(--muted);font-size:11px}
+    .lower-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;margin-top:20px}
+    .course-list{padding:4px 22px 16px}.course-row{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid #f0f2f7}.course-row:last-child{border-bottom:0}
+    .course-icon{width:38px;height:38px;border-radius:12px;background:#f0efff;display:grid;place-items:center;font-size:16px}.course-info{flex:1}.course-info strong{font-size:12px;display:block}.course-info small{font-size:10px;color:var(--muted);display:block;margin-top:4px}.course-count{font-size:12px;font-weight:800}
+    .activity{padding:4px 22px 17px}.activity-item{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid #f0f2f7}.activity-item:last-child{border-bottom:0}
+    .activity-dot{width:9px;height:9px;border-radius:50%;background:#7777ee;margin-top:5px;flex-shrink:0}.activity-item strong{font-size:11px}.activity-item p{margin:4px 0 0;font-size:10px;color:var(--muted);line-height:1.4}
+    .empty{text-align:center;padding:45px 20px;color:var(--muted);font-size:12px}
+    .page-view{display:none}.page-view.active{display:block}
+    .simple-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .simple-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow)}
+    .simple-card h3{font-size:14px;margin:0 0 8px}.simple-card p{font-size:12px;color:var(--muted);line-height:1.6;margin:0}
+    .notice{background:#f3f3ff;border:1px solid #e6e6ff;color:#5758b7;border-radius:10px;padding:13px 15px;font-size:11px;line-height:1.5;margin-bottom:18px}
+    .modal-backdrop{position:fixed;inset:0;background:#151a2c88;display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+    .modal-backdrop.show{display:flex}.modal{background:#fff;width:100%;max-width:570px;border-radius:18px;box-shadow:0 25px 80px #11182b44;max-height:92vh;overflow:auto}
+    .modal-head{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.modal-head h2{margin:0;font-size:17px}
+    .modal-body{padding:22px 24px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{display:grid;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:11px;font-weight:750;color:#5d6679}.field input,.field select{width:100%;font-size:12px;padding:11px}
+    .modal-foot{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:9px}
+    .toast{position:fixed;bottom:25px;right:25px;background:#202640;color:#fff;padding:13px 18px;border-radius:11px;font-size:12px;box-shadow:var(--shadow);display:none;z-index:20}.toast.show{display:block;animation:up .2s ease}
+    @keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:1150px){.sidebar{width:215px}.content{padding:25px 22px}.topbar{padding:0 22px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.panel-head{align-items:flex-start;flex-direction:column}}
+    @media(max-width:760px){.sidebar{width:67px;padding:18px 8px}.brand{padding:0 6px 25px}.brand span,.nav-label,.nav button .nav-text,.help-card,.sidebar-bottom{display:none}.brand-mark{width:42px;height:42px}.nav button{justify-content:center;padding:13px 5px}.nav button .ico{font-size:19px}.topbar{height:65px;padding:0 15px}.today,.profile div:not(.avatar){display:none}.content{padding:22px 14px}.welcome{flex-direction:column}.welcome h1{font-size:24px}.stats{gap:10px}.stat{padding:15px}.stat h2{font-size:24px}.lower-grid{grid-template-columns:1fr}.simple-grid{grid-template-columns:1fr}.panel-head{padding:17px}.filters{width:100%}.search-wrap,.search-wrap input{width:100%}.filters select{flex:1;min-width:110px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.table-footer{gap:10px;flex-wrap:wrap}td,th{padding:13px 14px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">C</div><span>CampusFlow<small>STUDENT PORTAL</small></span></div>
+    <div class="nav-label">WORKSPACE</div>
+    <nav class="nav" aria-label="Main navigation">
+      <button class="active" data-page="dashboard"><span class="ico">▦</span><span class="nav-text">Dashboard</span></button>
+      <button data-page="students"><span class="ico">♙</span><span class="nav-text">Students</span></button>
+      <button data-page="courses"><span class="ico">▤</span><span class="nav-text">Courses</span></button>
+      <button data-page="attendance"><span class="ico">◷</span><span class="nav-text">Attendance</span></button>
+      <button data-page="patterns"><span class="ico">⌘</span><span class="nav-text">Design Patterns</span></button>
+    </nav>
+    <div class="sidebar-bottom"><div class="help-card"><strong>Need a hand?</strong><p>Explore how this demo is structured and how the patterns work.</p><button onclick="showPage('patterns')">View architecture →</button></div></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">Workspace&nbsp; / &nbsp;<strong id="crumbName">Dashboard</strong></div>
+      <div class="top-actions"><span class="today" id="todayLabel"></span><div class="profile"><div class="avatar">AD</div><div><strong>Admin Demo</strong><small>Administrator</small></div></div></div>
+    </header>
+    <div class="content">
+      <section id="dashboard" class="page-view active">
+        <div class="welcome"><div><h1>Good afternoon, Admin 👋</h1><p>Here's what's happening across your campus today.</p></div><button class="primary-btn" onclick="openModal()">＋ &nbsp;Add new student</button></div>
+        <div class="stats">
+          <div class="stat"><div class="stat-top"><span>Total students</span><div class="stat-icon purple">♙</div></div><h2 id="totalStudents">0</h2><div class="trend">↗ Live data <span>from student records</span></div></div>
+          <div class="stat"><div class="stat-top"><span>Active students</span><div class="stat-icon mint">✓</div></div><h2 id="activeStudents">0</h2><div class="trend">● Enrollment status</div></div>
+          <div class="stat"><div class="stat-top"><span>Courses offered</span><div class="stat-icon peach">▤</div></div><h2 id="totalCourses">0</h2><div class="trend">● Academic programs</div></div>
+          <div class="stat"><div class="stat-top"><span>Avg. attendance</span><div class="stat-icon pink">◷</div></div><h2 id="avgAttendance">0%</h2><div class="trend">● Across all students</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2>Student directory</h2><p>Manage your student records and enrollment details.</p></div><div class="filters"><div class="search-wrap"><span>⌕</span><input id="searchInput" placeholder="Search students..." aria-label="Search students"></div><select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option>Active</option><option>Inactive</option><option>Probation</option></select><select id="courseFilter" aria-label="Filter by course"><option value="all">All courses</option></select><button class="outline-btn" onclick="exportCSV()">↓ Export CSV</button></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Student</th><th>Student ID</th><th>Course</th><th>Year</th><th>Attendance</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentRows"></tbody></table></div>
+          <div class="table-footer"><span id="recordCount">Showing 0 students</span><span>Local demo · Changes save in this browser</span></div>
+        </div>
+        <div class="lower-grid">
+          <div class="panel"><div class="panel-head"><div><h2>Popular courses</h2><p>Student enrollment by course</p></div><button class="outline-btn" onclick="showPage('courses')">View courses</button></div><div class="course-list" id="courseList"></div></div>
+          <div class="panel"><div class="panel-head"><div><h2>Recent activity</h2><p>Latest changes in the student directory</p></div></div><div class="activity" id="activityList"></div></div>
+        </div>
+      </section>
+      <section id="students" class="page-view">
+        <div class="welcome"><div><h1>Student directory</h1><p>View and manage student profiles, enrollment, and academic details.</p></div><button class="primary-btn" onclick="openModal()">＋ &nbsp;Add new student</button></div>
+        <div class="notice">Tip: Use search and filters to find records. Add, edit, and delete actions update the dashboard automatically.</div>
+        <div class="panel"><div class="panel-head"><div><h2>All student records</h2><p>Your complete student list.</p></div><div class="filters"><div class="search-wrap"><span>⌕</span><input id="searchInput2" placeholder="Search students..." aria-label="Search students"></div><button class="outline-btn" onclick="exportCSV()">↓ Export CSV</button></div></div><div class="table-wrap"><table><thead><tr><th>Student</th><th>Student ID</th><th>Course</th><th>Year</th><th>Attendance</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentRows2"></tbody></table></div><div class="table-footer"><span id="recordCount2"></span><span>CampusFlow student records</span></div></div>
+      </section>
+      <section id="courses" class="page-view">
+        <div class="welcome"><div><h1>Courses</h1><p>Academic programs and current student enrollment.</p></div><button class="outline-btn" onclick="showToast('Demo course catalog: edit the courses array in index.html to customize it.')">ⓘ &nbsp;About courses</button></div>
+        <div class="simple-grid" id="courseCards"></div>
+      </section>
+      <section id="attendance" class="page-view">
+        <div class="welcome"><div><h1>Attendance overview</h1><p>Monitor attendance percentages and identify students who may need support.</p></div><button class="outline-btn" onclick="exportCSV()">↓ Export records</button></div>
+        <div class="notice">Attendance values in this demo are editable in each student's profile. This is a summary dashboard, not a live institutional attendance system.</div>
+        <div class="stats"><div class="stat"><div class="stat-top">Above 90%<div class="stat-icon mint">✓</div></div><h2 id="attHigh">0</h2><div class="trend">Strong attendance</div></div><div class="stat"><div class="stat-top">75–89%<div class="stat-icon purple">◷</div></div><h2 id="attMid">0</h2><div class="trend">On track</div></div><div class="stat"><div class="stat-top">Below 75%<div class="stat-icon peach">!</div></div><h2 id="attLow">0</h2><div class="trend">Needs attention</div></div></div>
+        <div class="panel"><div class="panel-head"><div><h2>Attendance by student</h2><p>Use the edit action to update an attendance percentage.</p></div></div><div class="table-wrap"><table><thead><tr><th>Student</th><th>Course</th><th>Attendance</th><th>Guidance</th><th>Action</th></tr></thead><tbody id="attendanceRows"></tbody></table></div></div>
+      </section>
+      <section id="patterns" class="page-view">
+        <div class="welcome"><div><h1>Design patterns</h1><p>Patterns used to keep the student management code organized and maintainable.</p></div></div>
+        <div class="notice"><strong>Learning note:</strong> This is a front-end demonstration. The patterns are implemented in JavaScript; a production system should add authentication, server-side validation, a database, and access control.</div>
+        <div class="simple-grid">
+          <div class="simple-card"><h3>01 · Singleton</h3><p><strong>StudentStore</strong> has one shared instance for the app. It owns the current records and persistence layer, avoiding multiple competing copies of student data.</p></div>
+          <div class="simple-card"><h3>02 · Factory</h3><p><strong>StudentFactory.create()</strong> builds student objects in a consistent shape, normalizing IDs, names, course, year, status, and attendance.</p></div>
+          <div class="simple-card"><h3>03 · Observer</h3><p><strong>EventBus</strong> broadcasts a “students:changed” event after data changes. Dashboard cards, tables, and attendance summaries re-render in response.</p></div>
+          <div class="simple-card"><h3>04 · Strategy</h3><p><strong>Filter strategies</strong> provide interchangeable ways to filter records by name, status, or course. This keeps filtering logic separate from rendering.</p></div>
+          <div class="simple-card"><h3>05 · Module pattern</h3><p>The <strong>StudentStore</strong>, <strong>StudentFactory</strong>, <strong>EventBus</strong>, and UI controller are separate modules with clear responsibilities.</p></div>
+          <div class="simple-card"><h3>06 · MVC-inspired UI</h3><p>The data store acts as the model, UI controller handles user actions, and render functions update the views. This separation makes future changes easier.</p></div>
+        </div>
+        <div class="panel" style="margin-top:20px"><div class="panel-head"><div><h2>Architecture flow</h2><p>What happens when a student record changes?</p></div></div><div style="padding:25px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center"><div class="simple-card" style="min-width:140px;box-shadow:none"><strong>User action</strong><p>Form / edit / delete</p></div><span style="color:#7777ee;font-size:22px">→</span><div class="simple-card" style="min-width:140px;box-shadow:none"><strong>StudentStore</strong><p>Update + save data</p></div><span style="color:#7777ee;font-size:22px">→</span><div class="simple-card" style="min-width:140px;box-shadow:none"><strong>EventBus</strong><p>Notify observers</p></div><span style="color:#7777ee;font-size:22px">→</span><div class="simple-card" style="min-width:140px;box-shadow:none"><strong>UI renders</strong><p>Cards / tables update</p></div></div></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="studentModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modal-head"><h2 id="modalTitle">Add new student</h2><button class="icon-btn" onclick="closeModal()" aria-label="Close dialog">✕</button></div>
+    <form id="studentForm">
+      <div class="modal-body"><div class="form-grid">
+        <div class="field"><label for="fullName">Full name *</label><input id="fullName" required placeholder="e.g. Aanya Sharma" maxlength="70"></div>
+        <div class="field"><label for="email">Email address *</label><input id="email" required type="email" placeholder="student@college.edu"></div>
+        <div class="field"><label for="course">Course *</label><select id="course" required></select></div>
+        <div class="field"><label for="year">Academic year *</label><select id="year"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></div>
+        <div class="field"><label for="attendance">Attendance (%)</label><input id="attendance" type="number" min="0" max="100" value="85" required></div>
+        <div class="field"><label for="status">Enrollment status</label><select id="status"><option>Active</option><option>Inactive</option><option>Probation</option></select></div>
+      </div></div>
+      <div class="modal-foot"><button type="button" class="outline-btn" onclick="closeModal()">Cancel</button><button type="submit" class="primary-btn">Save student</button></div>
+    </form>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* MODULE: EventBus - Observer pattern */
+const EventBus = (() => {
+  const events = {};
+  return {
+    on(event, callback) { (events[event] ||= []).push(callback); },
+    emit(event, payload) { (events[event] || []).forEach(callback => callback(payload)); }
+  };
+})();
+
+/* FACTORY pattern: consistent student object creation */
+const StudentFactory = {
+  create(input) {
+    return {
+      id: input.id || `STU${String(Date.now()).slice(-6)}`,
+      name: String(input.name || '').trim(),
+      email: String(input.email || '').trim().toLowerCase(),
+      course: input.course || 'Computer Science & Engineering',
+      year: input.year || '1st Year',
+      attendance: Math.max(0, Math.min(100, Number(input.attendance ?? 85))),
+      status: input.status || 'Active',
+      createdAt: input.createdAt || new Date().toISOString()
+    };
+  }
+};
+
+/* SINGLETON pattern: one source of truth, persisted in localStorage */
+const StudentStore = (() => {
+  let instance;
+  function createStore() {
+    const key = 'campusflow_students_v1';
+    const defaults = [
+      {id:'STU24001',name:'Aarav Mehta',email:'aarav.mehta@campus.edu',course:'Computer Science & Engineering',year:'3rd Year',attendance:92,status:'Active'},
+      {id:'STU24002',name:'Ananya Reddy',email:'ananya.reddy@campus.edu',course:'Artificial Intelligence & ML',year:'2nd Year',attendance:86,status:'Active'},
+      {id:'STU24003',name:'Ishaan Patel',email:'ishaan.patel@campus.edu',course:'Electronics & Communication',year:'4th Year',attendance:71,status:'Probation'},
+      {id:'STU24004',name:'Diya Nair',email:'diya.nair@campus.edu',course:'Computer Science & Engineering',year:'1st Year',attendance:96,status:'Active'},
+      {id:'STU24005',name:'Kabir Singh',email:'kabir.singh@campus.edu',course:'Data Science',year:'3rd Year',attendance:78,status:'Active'},
+      {id:'STU24006',name:'Meera Iyer',email:'meera.iyer@campus.edu',course:'Artificial Intelligence & ML',year:'2nd Year',attendance:88,status:'Active'},
+      {id:'STU24007',name:'Rohan Das',email:'rohan.das@campus.edu',course:'Information Technology',year:'4th Year',attendance:63,status:'Inactive'},
+      {id:'STU24008',name:'Sara Khan',email:'sara.khan@campus.edu',course:'Data Science',year:'1st Year',attendance:94,status:'Active'}
+    ].map(s => StudentFactory.create(s));
+    let students;
+    try { students = JSON.parse(localStorage.getItem(key)) || defaults; }
+    catch { students = defaults; }
+    const save = () => { try { localStorage.setItem(key, JSON.stringify(students)); } catch(e) { console.warn('Could not persist records', e); } };
+    return {
+      getAll: () => students.map(s => ({...s})),
+      add(input) {
+        const base = StudentFactory.create(input);
+        let id = base.id, suffix = 1;
+        while (students.some(s => s.id === id)) id = `${base.id}-${suffix++}`;
+        const student = {...base, id}; students.unshift(student); save(); EventBus.emit('students:changed',{type:'added',student}); return student;
+      },
+      update(id, input) {
+        const index = students.findIndex(s => s.id === id);
+        if(index < 0) return null;
+        students[index] = StudentFactory.create({...students[index],...input,id});
+        save(); EventBus.emit('students:changed',{type:'updated',student:students[index]}); return students[index];
+      },
+      remove(id) {
+        const student = students.find(s => s.id === id);
+        if(!student) return false;
+        students = students.filter(s => s.id !== id); save(); EventBus.emit('students:changed',{type:'deleted',student}); return true;
+      }
+    };
+  }
+  return { getInstance() { if(!instance) instance = createStore(); return instance; } };
+})();
+
+/* STRATEGY pattern: interchangeable filtering strategies */
+const FilterStrategies = {
+  search: (students, query) => {
+    const q = query.trim().toLowerCase();
+    return !q ? students : students.filter(s => [s.name,s.email,s.id,s.course].some(v => v.toLowerCase().includes(q)));
+  },
+  status: (students, status) => status === 'all' ? students : students.filter(s => s.status === status),
+  course: (students, course) => course === 'all' ? students : students.filter(s => s.course === course)
+};
+const store = StudentStore.getInstance();
+const courses = [
+  {name:'Computer Science & Engineering',short:'CSE',icon:'⌘',color:'#eeeeff'},
+  {name:'Artificial Intelligence & ML',short:'AIML',icon:'✧',color:'#e4f7ef'},
+  {name:'Electronics & Communication',short:'ECE',icon:'⌁',color:'#fff1df'},
+  {name:'Data Science',short:'DS',icon:'◈',color:'#ffeaf0'},
+  {name:'Information Technology',short:'IT',icon:'▣',color:'#e6f3ff'}
+];
+let editingId = null;
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials = name => name.split(/\s+/).slice(0,2).map(p=>p[0]||'').join('').toUpperCase();
+const statusClass = status => status === 'Active' ? 'status-active' : status === 'Probation' ? 'status-probation' : 'status-inactive';
+const courseShort = name => (courses.find(c=>c.name===name)||{short:'GEN'}).short;
+
+function getFilteredStudents() {
+  let result = store.getAll();
+  result = FilterStrategies.search(result, $('searchInput')?.value || $('searchInput2')?.value || '');
+  result = FilterStrategies.status(result, $('statusFilter')?.value || 'all');
+  result = FilterStrategies.course(result, $('courseFilter')?.value || 'all');
+  return result;
+}
+function studentRow(s) {
+  return `<tr><td><div class="student"><div class="student-avatar">${esc(initials(s.name))}</div><div><div class="student-name">${esc(s.name)}</div><div class="student-email">${esc(s.email)}</div></div></div></td><td><strong>${esc(s.id)}</strong></td><td>${esc(courseShort(s.course))}</td><td>${esc(s.year)}</td><td><div class="attendance"><div class="bar ${s.attendance<75?'low':''}"><span style="width:${s.attendance}%"></span></div><strong>${s.attendance}%</strong></div></td><td><span class="pill ${statusClass(s.status)}">${esc(s.status)}</span></td><td><div class="row-actions"><button class="icon-btn" title="Edit student" aria-label="Edit ${esc(s.name)}" onclick="editStudent('${esc(s.id)}')">✎</button><button class="icon-btn" title="Delete student" aria-label="Delete ${esc(s.name)}" onclick="deleteStudent('${esc(s.id)}')">⌫</button></div></td></tr>`;
+}
+function renderTables() {
+  const filtered = getFilteredStudents();
+  const rows = filtered.map(studentRow).join('') || `<tr><td colspan="7"><div class="empty">No students found. Try another search or add a student.</div></td></tr>`;
+  $('studentRows').innerHTML = rows; $('studentRows2').innerHTML = rows;
+  $('recordCount').textContent = `Showing ${filtered.length} of ${store.getAll().length} students`;
+  $('recordCount2').textContent = `Showing ${filtered.length} of ${store.getAll().length} students`;
+}
+function renderDashboard() {
+  const students = store.getAll(), active = students.filter(s=>s.status==='Active');
+  $('totalStudents').textContent = students.length;
+  $('activeStudents').textContent = active.length;
+  $('totalCourses').textContent = courses.length;
+  $('avgAttendance').textContent = `${students.length ? Math.round(students.reduce((sum,s)=>sum+s.attendance,0)/students.length) : 0}%`;
+  $('attHigh').textContent = students.filter(s=>s.attendance>=90).length;
+  $('attMid').textContent = students.filter(s=>s.attendance>=75&&s.attendance<90).length;
+  $('attLow').textContent = students.filter(s=>s.attendance<75).length;
+  $('courseList').innerHTML = courses.slice(0,4).map(c=>{
+    const count=students.filter(s=>s.course===c.name).length;
+    return `<div class="course-row"><div class="course-icon" style="background:${c.color}">${c.icon}</div><div class="course-info"><strong>${esc(c.name)}</strong><small>${c.short} · Academic program</small></div><div class="course-count">${count}</div></div>`;
+  }).join('');
+  $('courseCards').innerHTML = courses.map(c=>{
+    const enrolled=students.filter(s=>s.course===c.name).length;
+    return `<div class="simple-card"><div class="course-icon" style="background:${c.color};margin-bottom:15px">${c.icon}</div><h3>${esc(c.name)}</h3><p>${enrolled} enrolled student${enrolled===1?'':'s'}<br><span style="display:inline-block;margin-top:10px;background:#f2f3f8;padding:5px 8px;border-radius:6px;font-size:10px;font-weight:800">${c.short}</span></p></div>`;
+  }).join('');
+  $('attendanceRows').innerHTML = [...students].sort((a,b)=>a.attendance-b.attendance).map(s=>`<tr><td><div class="student"><div class="student-avatar">${esc(initials(s.name))}</div><div><div class="student-name">${esc(s.name)}</div><div class="student-email">${esc(s.id)}</div></div></div></td><td>${esc(courseShort(s.course))}</td><td><div class="attendance"><div class="bar ${s.attendance<75?'low':''}"><span style="width:${s.attendance}%"></span></div><strong>${s.attendance}%</strong></div></td><td>${s.attendance<75?'<span class="pill status-probation">Needs attention</span>':s.attendance<90?'<span class="pill status-inactive">Monitor</span>':'<span class="pill status-active">Excellent</span>'}</td><td><button class="outline-btn" onclick="editStudent('${esc(s.id)}')">Edit</button></td></tr>`).join('');
+  renderActivity();
+}
+let activityLog = [{title:'Demo workspace initialized',detail:'Sample student records loaded for preview.',time:'Just now'}];
+function renderActivity() {
+  $('activityList').innerHTML = activityLog.slice(0,4).map((a,i)=>`<div class="activity-item"><div class="activity-dot" style="background:${i===0?'#6968ef':i===1?'#1b9a72':'#d88a24'}"></div><div><strong>${esc(a.title)}</strong><p>${esc(a.detail)} · ${esc(a.time)}</p></div></div>`).join('');
+}
+function refresh() { renderDashboard(); renderTables(); }
+function showToast(message) { const toast=$('toast'); toast.textContent=message; toast.classList.add('show'); clearTimeout(showToast.timer); showToast.timer=setTimeout(()=>toast.classList.remove('show'),2600); }
+function showPage(page) {
+  document.querySelectorAll('.page-view').forEach(el=>el.classList.toggle('active',el.id===page));
+  document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
+  const names={dashboard:'Dashboard',students:'Students',courses:'Courses',attendance:'Attendance',patterns:'Design Patterns'};
+  $('crumbName').textContent=names[page]||'Dashboard';
+  if(page==='students') renderTables();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.dataset.page)));
+['searchInput','searchInput2','statusFilter','courseFilter'].forEach(id=>$(id)?.addEventListener('input',renderTables));
+function fillCourseOptions() {
+  $('course').innerHTML = courses.map(c=>`<option>${esc(c.name)}</option>`).join('');
+  $('courseFilter').innerHTML = '<option value="all">All courses</option>'+courses.map(c=>`<option value="${esc(c.name)}">${esc(c.short)}</option>`).join('');
+}
+function openModal(student=null) {
+  editingId=student?.id||null;
+  $('modalTitle').textContent=student?'Edit student':'Add new student';
+  $('fullName').value=student?.name||''; $('email').value=student?.email||'';
+  $('course').value=student?.course||courses[0].name; $('year').value=student?.year||'1st Year';
+  $('attendance').value=student?.attendance??85; $('status').value=student?.status||'Active';
+  $('studentModal').classList.add('show'); setTimeout(()=>$('fullName').focus(),50);
+}
+function closeModal() { $('studentModal').classList.remove('show'); $('studentForm').reset(); editingId=null; }
+function editStudent(id) { const student=store.getAll().find(s=>s.id===id); if(student) openModal(student); }
+function deleteStudent(id) {
+  const student=store.getAll().find(s=>s.id===id); if(!student) return;
+  if(confirm(`Delete ${student.name} (${student.id})? This cannot be undone.`)) {
+    store.remove(id);
+    activityLog.unshift({title:'Student record deleted',detail:`${student.name} was removed from the directory.`,time:'Just now'});
+    showToast('Student record deleted.'); 
+  }
+}
+$('studentForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const input={name:$('fullName').value,email:$('email').value,course:$('course').value,year:$('year').value,attendance:Number($('attendance').value),status:$('status').value};
+  if(!input.name.trim() || !input.email.trim()) return;
+  if(input.attendance<0||input.attendance>100){showToast('Attendance must be between 0 and 100.');return;}
+  if(editingId) {
+    const result=store.update(editingId,input);
+    if(result) activityLog.unshift({title:'Student record updated',detail:`${result.name}'s details were updated.`,time:'Just now'});
+    showToast('Student details updated.');
+  } else {
+    if(store.getAll().some(s=>s.email.toLowerCase()===input.email.toLowerCase())) {showToast('A student with this email already exists.');return;}
+    const result=store.add(input);
+    activityLog.unshift({title:'New student enrolled',detail:`${result.name} was added to ${courseShort(result.course)}.`,time:'Just now'});
+    showToast('New student added successfully.');
+  }
+  closeModal(); refresh();
+});
+$('studentModal').addEventListener('click',e=>{if(e.target===$('studentModal'))closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+function exportCSV() {
+  const data=store.getAll();
+  const headers=['Student ID','Full Name','Email','Course','Year','Attendance','Status'];
+  const csv=[headers,...data.map(s=>[s.id,s.name,s.email,s.course,s.year,s.attendance+'%',s.status])]
+    .map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='campusflow-students.csv';a.click();URL.revokeObjectURL(url);
+  showToast('CSV export prepared.');
+}
+EventBus.on('students:changed', refresh);
+$('todayLabel').textContent = new Intl.DateTimeFormat('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(new Date());
+fillCourseOptions();
+refresh();
+</script>
+</body>
+</html>
